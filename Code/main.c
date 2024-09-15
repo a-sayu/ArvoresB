@@ -29,16 +29,29 @@ NoArvoreB* inicializaNo (int t, bool folha) {
     // Aqui foi feita a criação de um ponteiro para um local
     // alocado na memória para o novo nó.
     NoArvoreB* novo = (NoArvoreB*)malloc(sizeof(NoArvoreB));
+    if (novo == NULL) {
+        printf("Erro ao alocar memória\n");
+    }
+
     // Foi criado um ponteiro para um lugar alocado na
     // memória apontado para as chaves. Com um número
     // igual ao máximo de de chaves.
     novo->chaves = (int*)malloc((2*t-1)*sizeof(int));
+    if (novo->chaves == NULL) {
+        printf("Erro ao alocar memória\n");
+    }
+
     // Foi criado um ponteiro para um lugar que aloca
     // espaço na memória para ponteiros que podem
     // apontar para arquivos filhos.
     novo->filhos = (char**)malloc(2*t*sizeof(char*));
+    if (novo->filhos == NULL) {
+        printf("Erro ao alocar memória\n");
+    }
+
     // Não há nenhuma chave inicialmente duh.
     novo->qtd = 0;
+
     // É uma folha por não ter nenhum filho.
     novo->folha = true;
     return novo;
@@ -49,6 +62,9 @@ NoArvoreB* inicializaNo (int t, bool folha) {
 // mínimo de chaves e filhos.
 ArvoreB* inicializaArvore(int t) {
     ArvoreB* nova = (ArvoreB*)malloc(sizeof(ArvoreB));
+    if (nova == NULL) {
+        printf("Erro ao alocar memória\n");
+    }
     nova->raiz = inicializaNo(t, true);
     nova->t = t;
     return nova;
@@ -94,6 +110,9 @@ bool buscaNo(NoArvoreB* no, int busca) {
     // Se ele não for uma folha, então o filho
     // dessa posição pode ter em seu array
     // o elemento 'busca'. 
+    // PS: acho que toda vez que faz uma busca
+    // nos filhos, significa que aumenta em um
+    // o nível, talvez seja útil no futuro.
     else return buscaNo(no->filhos[i], busca);
 }
 
