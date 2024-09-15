@@ -3,13 +3,14 @@
 
 // Struct padrão do nó da árvore.
 typedef struct No {
-    // vetor dos numeros armazenados
+    char **pai;
+    // Vetor dos numeros armazenados
     int *chaves;
-    // quantidade de numeros armazenados no nó
+    // Quantidade de numeros armazenados no nó
     int qtd;
-    // indicador de folha
+    // Indicador de folha
     bool folha;
-    // vetor de strings/nomes dos arquivos
+    // Vetor de strings/nomes dos arquivos
     char **filhos;
 } NoArvoreB;
 
@@ -49,6 +50,11 @@ NoArvoreB* inicializaNo (int t, bool folha) {
         printf("Erro ao alocar memória\n");
     }
 
+    novo->pai = (char**)malloc(2*t*sizeof(char*));
+    if (novo->pai == NULL) {
+        printf("Erro ao alocar memória\n");
+    }
+
     // Não há nenhuma chave inicialmente duh.
     novo->qtd = 0;
 
@@ -83,22 +89,23 @@ bool estaCheio(NoArvoreB* no, int t) {
 // nó específico
 // Parâmetros: o nó e o elemento a ser buscado.
 // Apenas indica se está presente.
-bool buscaNo(NoArvoreB* no, int busca) {
+bool buscaNo(NoArvoreB* no, int elemento) {
     int i;
 
     // Iniciando em zero, enquanto o 'i' for menor que a
-    // quantidade de chaves no nó, e o elemento 'busca'
+    // quantidade de chaves no nó, e o elemento 'elemento'
     // for maior que o elemento na posição 'i' no array
     // Continuar avançando pelo array, até uma das
     // situações forem falsas.
-    for (i = 0; i < no->qtd && busca > no->chaves[i]; i++);
+    for (i = 0; i < no->qtd && elemento > no->chaves[i];
+    i++);
 
     // Ao finalizar o for, se o i for menor que a quantidade
     // de chaves no nó, ou seja o que falhou foi o elemento
-    // 'busca' ser maior que o elemento na posição 'i', 
+    // 'elemento' ser maior que o elemento na posição 'i', 
     // então a primeira pergunta é:
     // "Esse é o elemento buscado?"
-    if (i < no->qtd && busca == no->chaves[i]) {
+    if (i < no->qtd && elemento == no->chaves[i]) {
         // Se sim, a busca foi concluída.
         return true; 
     }
@@ -109,20 +116,109 @@ bool buscaNo(NoArvoreB* no, int busca) {
     }
     // Se ele não for uma folha, então o filho
     // dessa posição pode ter em seu array
-    // o elemento 'busca'. 
+    // o elemento 'elemento'. 
     // PS: acho que toda vez que faz uma busca
     // nos filhos, significa que aumenta em um
     // o nível, talvez seja útil no futuro.
-    else return buscaNo(no->filhos[i], busca);
+    else return buscaNo(no->filhos[i], elemento);
 }
 
 // Como utilizamos um descritor, essa função serve para
 // automaticamente já nos dirigir para a raiz.
-bool buscaArvore(ArvoreB* arvore, int chave) {
-    return buscaNo(arvore->raiz, chave);
+bool buscaArvore(ArvoreB* arvore, int elemento) {
+    return buscaNo(arvore->raiz, elemento);
+}
+
+// Divisão
+// O filho vai ter um no menor e um no maior, e o
+// do meio irá subir para cima.
+void dividirNo(ArvoreB* arvore, int pos,
+NoArvoreB* filhoCheio) {
+    int t = arvore->t;
+    NoArvoreB* pai = filhoCheio->pai;
+    NoArvoreB* novoFilho = inicializaNo(t, filhoCheio->folha);
+    novoFilho->qtd = t - 1;
+
+    for (int i = 0; i < t - 1; i++) {
+        *(novoFilho->chaves+i) = *(filhoCheio->chaves+i+t);
+    }
+    
+    if (!filhoCheio->folha) {
+        for (int i = 0; i < t; i++) {
+            *(novoFilho->filhos+i) = *(filhoCheio->filhos+i+t);
+        }
+    }
+
+    filhoCheio->qtd = t - 1;
+
+    if (!estaCheio(pai, t)) {
+        for (int i = pai->qtd; i >= pos+1; i--) {
+            *(pai->filhos+i+1) = *(pai->filhos+i);
+        }
+
+        *(pai->filhos+pos+1) = novoFilho;
+
+        for (int i = pai->qtd - 1; i >= pos; i--) {
+            *(pai->chaves+i+1) = *(pai->chaves+i);
+        }
+
+        *(pai->chaves+pos) = *(filhoCheio->chaves+t-1);
+
+        pai->qtd++;
+
+    } else {
+        dividirNo(arvore, pos, pai);
+    }
+    novoFilho->pai = filhoCheio->pai;
 }
 
 // Inserção
+
+// Função de Inserção do No na árvore.
+void inserirNo(ArvoreB* arvore, NoArvoreB* no, int elemento) {
+    int t = arvore->t;
+    // Começa do final para facilitar o deslocamento.
+    int pos = no->qtd-1;
+    // Checa se está cheio para não ocorrer de
+    // ultrapassar o máximo.
+    bool cheio = estaCheio(no, t);
+
+    // Se o no estiver cheio, não seria possivel realizar
+    // nada enquanto ele não diminui de tamanho.
+    if (!cheio) {
+        // Se o nó não tiver filhos/folha, deve ser encontrado
+        // onde ele deve ser inserido. Ou seja, enquanto o
+        // elemento for inferior ao elemento da chave, diminui
+        // para encontrar um ponto em que ele é maior.
+        if (no->folha) {
+            for (pos; pos >= 0
+            && elemento < *(no->chaves+pos); pos--) {
+                // Dessa forma, move-se o elemento para o
+                // lado.
+                *(no->chaves+pos+1) = *(no->chaves+pos);
+            }
+        }
+        // Se o nó tiver filhos/não é folha, deve ser
+        // encontrado o local em que o elemento é o menor
+        // diminuindo a posição.
+        else {
+            for (pos; pos >= 0
+            && elemento < *(no->chaves+pos); pos--);
+            pos++;
+            inserirNo(*(no->filhos+pos), elemento, t);
+        }
+    } else {
+        if (no->folha) {
+            dividirNo(arvore, pos, no);
+        } else {
+            dividirNo(arvore, pos, *(no->filhos+pos));
+            if (elemento > *(no->chaves+pos)) {
+                pos++;
+            }
+        }
+        inserirNo(arvore, *(no->filhos+pos), elemento);
+    }
+}
 
 // Remoção
 
