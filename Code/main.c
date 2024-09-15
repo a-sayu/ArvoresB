@@ -54,34 +54,6 @@ ArvoreB* inicializaArvore(int t) {
     return nova;
 }
 
-// Afim de manter o balanceamento da árvore e capacidade
-// dos nós, utiliza-se a seguinte função de divisõa de nó
-// complementando a função de inserção e busca
-// . 'arvore' é o descritor que vai indicar o t;
-// . 'pai' é o pai do nó que vai ser dividido.
-// . 'filho' é o no que será dividido
-// . 'pos' é a posição do filho em relação ao pai
-void divideNo(ArvoreB* arvore, NoArvoreB* pai,
-NoArvoreB* filho, int pos) {
-    // como parâmetro de toda inicialização é preciso
-    // indicar a ordem do nó.
-    int t = arvore->t;
-    // Para lidar com a divisão de um nó, cria-se um
-    // novo nó para se ter mais espaço e manter a
-    // árvore equilibrada, sendo o irmão do filho
-    // passado no parâmetro.
-    NoArvoreB* novoFilho = inicializaNo(t, filho->folha);
-    // o novo filho irá receber metade das chaves
-    // do filho.
-    novoFilho->qtd = t - 1;
-    for (int i = 0; i < t - 1; i++) {
-        // Ele copia a metade da direita do filho para
-        // o novo filho
-        *(novoFilho->chaves+i) = *(filho->chaves+i+t);
-    }
-    
-}
-
 // Busca
 
 // Inserção
