@@ -54,7 +54,54 @@ ArvoreB* inicializaArvore(int t) {
     return nova;
 }
 
-// Busca
+// Função que verifica se o nó está cheio
+// passado o paarâmetros do nó a ser checado
+// e a ordem da árvore.
+bool estaCheio(NoArvoreB* no, int t) {
+    return no->qtd == (2 * t - 1);
+}
+
+// BUSCA
+
+// Função  para buscar uma chave a partir de um
+// nó específico
+// Parâmetros: o nó e o elemento a ser buscado.
+// Apenas indica se está presente.
+bool buscaNo(NoArvoreB* no, int busca) {
+    int i;
+
+    // Iniciando em zero, enquanto o 'i' for menor que a
+    // quantidade de chaves no nó, e o elemento 'busca'
+    // for maior que o elemento na posição 'i' no array
+    // Continuar avançando pelo array, até uma das
+    // situações forem falsas.
+    for (i = 0; i < no->qtd && busca > no->chaves[i]; i++);
+
+    // Ao finalizar o for, se o i for menor que a quantidade
+    // de chaves no nó, ou seja o que falhou foi o elemento
+    // 'busca' ser maior que o elemento na posição 'i', 
+    // então a primeira pergunta é:
+    // "Esse é o elemento buscado?"
+    if (i < no->qtd && busca == no->chaves[i]) {
+        // Se sim, a busca foi concluída.
+        return true; 
+    }
+    // Se não, e o nó for uma folha.
+    else if (no->folha) {
+        // Logo esse elemento não está na árvore.
+        return false;
+    }
+    // Se ele não for uma folha, então o filho
+    // dessa posição pode ter em seu array
+    // o elemento 'busca'. 
+    else return buscaNo(no->filhos[i], busca);
+}
+
+// Como utilizamos um descritor, essa função serve para
+// automaticamente já nos dirigir para a raiz.
+bool buscaArvore(ArvoreB* arvore, int chave) {
+    return buscaNo(arvore->raiz, chave);
+}
 
 // Inserção
 
