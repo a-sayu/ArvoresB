@@ -142,7 +142,7 @@ NoArvoreB* filhoCheio) {
     for (int i = 0; i < t - 1; i++) {
         *(novoFilho->chaves+i) = *(filhoCheio->chaves+i+t);
     }
-    
+
     if (!filhoCheio->folha) {
         for (int i = 0; i < t; i++) {
             *(novoFilho->filhos+i) = *(filhoCheio->filhos+i+t);
@@ -183,31 +183,7 @@ void inserirNo(ArvoreB* arvore, NoArvoreB* no, int elemento) {
     // ultrapassar o máximo.
     bool cheio = estaCheio(no, t);
 
-    // Se o no estiver cheio, não seria possivel realizar
-    // nada enquanto ele não diminui de tamanho.
-    if (!cheio) {
-        // Se o nó não tiver filhos/folha, deve ser encontrado
-        // onde ele deve ser inserido. Ou seja, enquanto o
-        // elemento for inferior ao elemento da chave, diminui
-        // para encontrar um ponto em que ele é maior.
-        if (no->folha) {
-            for (pos; pos >= 0
-            && elemento < *(no->chaves+pos); pos--) {
-                // Dessa forma, move-se o elemento para o
-                // lado.
-                *(no->chaves+pos+1) = *(no->chaves+pos);
-            }
-        }
-        // Se o nó tiver filhos/não é folha, deve ser
-        // encontrado o local em que o elemento é o menor
-        // diminuindo a posição.
-        else {
-            for (pos; pos >= 0
-            && elemento < *(no->chaves+pos); pos--);
-            pos++;
-            inserirNo(*(no->filhos+pos), elemento, t);
-        }
-    } else {
+    if (cheio) {
         if (no->folha) {
             dividirNo(arvore, pos, no);
         } else {
@@ -216,6 +192,18 @@ void inserirNo(ArvoreB* arvore, NoArvoreB* no, int elemento) {
                 pos++;
             }
         }
+    }
+
+    if (no->folha) {
+        for (pos; pos >= 0
+        && elemento < *(no->chaves+pos); pos--) {
+            *(no->chaves+pos+1) = *(no->chaves+pos);
+        }
+        *(no->chaves+pos+1) = elemento;
+        no->qtd++;
+    } else {
+        for (pos; pos >= 0 && *(no->chaves+pos); pos--);
+        pos++;
         inserirNo(arvore, *(no->filhos+pos), elemento);
     }
 }
